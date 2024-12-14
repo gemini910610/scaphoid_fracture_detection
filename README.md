@@ -15,12 +15,13 @@ python make_dataset.py
 ```
 * 重新命名檔案
 * 將骨折偵測的座標換算為全局座標
+* 將骨折偵測的座標正歸化到[0, 1]
 <pre><code><b>dataset</b>
 ├ <b>fracture_detection</b>
 │ └ <b>annotations</b>
-│   └ xxxxxxxx.npy
+│   └ xxxxxxxx.pth
 └ <b>scaphoid_detection</b>
   ├ <b>annotations</b>
-  │ └ xxxxxxxx.npy
+  │ └ xxxxxxxx.pth
   └ <b>images</b>
     └ xxxxxxxx.jpg</code></pre>

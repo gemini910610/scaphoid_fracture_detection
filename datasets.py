@@ -33,6 +33,9 @@ class ScaphoidDataset(Dataset):
         image = augmentations['image']
         bbox = torch.tensor(augmentations['bboxes'][0]).reshape(1, 4)
         image = self.transform(image)
+        height = image.size(1)
+        width = image.size(2)
+        bbox = bbox * torch.tensor([width, height, width, height])
         label = torch.ones(1, dtype=torch.int64)
         return image, bbox, label, filename
     def __len__(self):

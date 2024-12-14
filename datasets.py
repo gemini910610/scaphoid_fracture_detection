@@ -1,8 +1,7 @@
 import albumentations
-import os
-import albumentations.pytorch
-import torch
 import cv2
+import os
+import torch
 
 from table import Table
 from torch.utils.data import Dataset
@@ -28,25 +27,27 @@ class ScaphoidDataset(Dataset):
         filename = self.filenames[index]
         with open(f'./dataset/scaphoid_detection/annotations/{filename}.pth', 'rb') as file:
             bbox = torch.load(file, weights_only=True)
-        image = cv2.imread(f'./dataset/scaphoid_detection/images/{filename}.jpg', 0)
+        image = cv2.imread(f'./dataset/scaphoid_detection/images/{filename}.jpg')
         augmentations = self.augmentation(image=image, bboxes=[bbox])
         image = augmentations['image']
-        bbox = torch.tensor(augmentations['bboxes'][0])
+        bbox = torch.tensor(augmentations['bboxes'][0]).reshape(1, 4)
         image = self.transform(image)
-        return image, bbox, filename
+        label = torch.ones(1, dtype=torch.int64)
+        return image, bbox, label, filename
     def __len__(self):
         return self.length
 
 if __name__ == '__main__':
     for side in ['AP', 'LA']:
         dataset = ScaphoidDataset(side)
-        image, bbox, filename = dataset[0]
+        image, bbox, label, filename = dataset[0]
         table = Table(
             title=f'Scaphoid({side})',
             headers=['Object', 'Content'],
             contents={
                 'Image': tuple(image.shape),
                 'Bounding Box': tuple(bbox.shape),
+                'Label': tuple(label.shape),
                 'Filename': filename
             }
         )

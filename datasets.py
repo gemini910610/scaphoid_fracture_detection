@@ -17,7 +17,8 @@ class ScaphoidDataset(Dataset):
         self.length = len(self.filenames)
         self.augmentation = albumentations.Compose([
             albumentations.CLAHE(always_apply=True),
-            albumentations.HorizontalFlip()
+            albumentations.HorizontalFlip(),
+            albumentations.RandomBrightnessContrast(brightness_limit=0)
         ], bbox_params=albumentations.BboxParams(format='albumentations', label_fields=[]))
         self.transform = transforms.Compose([
             transforms.ToTensor(),

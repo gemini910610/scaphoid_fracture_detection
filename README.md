@@ -25,3 +25,9 @@ python make_dataset.py
   │ └ xxxxxxxx.pth
   └ <b>images</b>
     └ xxxxxxxx.jpg</code></pre>
+## 資料預處理
+### 舟骨偵測
+1. CLAHE
+2. 隨機水平翻轉
+3. 隨機對比度調整
+4. 調整影像大小為(1400, 1200)

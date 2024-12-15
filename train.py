@@ -1,11 +1,12 @@
 import os
 import torch
 
+from argparse import ArgumentParser
 from datasets import ScaphoidDataset
 from metrics import IoU
 from models import FasterRCNN
 from rich_tqdm import tqdm, trange
-from torch import optim
+from torch import Generator, optim
 from torch.utils.data import DataLoader, random_split
 
 def run_epoch(model, loader, metric, train, *, optimizer=None):
@@ -54,8 +55,16 @@ def run_epoch(model, loader, metric, train, *, optimizer=None):
 
 os.makedirs('./experiments', exist_ok=True)
 
-dataset = ScaphoidDataset('AP')
-train_dataset, eval_dataset = random_split(dataset, [0.8, 0.2])
+parser = ArgumentParser()
+parser.add_argument('--side', type=str, default='AP', choices=['AP', 'LA'])
+args = parser.parse_args()
+
+side = args.side
+
+dataset = ScaphoidDataset(side)
+generator = Generator()
+generator.manual_seed(42)
+train_dataset, eval_dataset = random_split(dataset, [0.8, 0.2], generator)
 train_loader = DataLoader(train_dataset, 1, True)
 eval_loader = DataLoader(eval_dataset, 1, True)
 
@@ -90,4 +99,4 @@ for epoch in trange(epochs):
         torch.save({
             'model': state_dict,
             'loss': total_loss
-        }, f'./experiments/model_{epoch+1}.pth')
+        }, f'./experiments/{side}_{epoch+1}.pth')

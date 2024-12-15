@@ -90,4 +90,4 @@ for epoch in trange(epochs):
         torch.save({
             'model': state_dict,
             'loss': total_loss
-        }, f'./experiments/model_{epochs}.pth')
+        }, f'./experiments/model_{epoch+1}.pth')

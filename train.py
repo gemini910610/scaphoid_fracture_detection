@@ -73,7 +73,8 @@ optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=0.0001, momentu
 
 metric = IoU().cuda()
 
-epochs = 5000
+epochs = 1000
+save_frequency = 200
 total_loss = {
     'train': [],
     'eval': []
@@ -94,9 +95,10 @@ for epoch in trange(epochs):
     total_metric['eval'].append(eval_metric)
     tqdm.write(f' Eval Loss: {eval_loss:.6f}, IoU: {eval_metric:.6f}')
 
-    if (epoch + 1) % 1000 == 0:
+    if (epoch + 1) % save_frequency == 0:
         state_dict = model.state_dict()
         torch.save({
             'model': state_dict,
-            'loss': total_loss
+            'loss': total_loss,
+            'metric': total_metric
         }, f'./experiments/{side}_{epoch+1}.pth')

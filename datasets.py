@@ -3,19 +3,18 @@ import cv2
 import os
 import torch
 
-from table import Table
 from torch.utils.data import Dataset
 from torchvision import transforms
 
 class ScaphoidDataset(Dataset):
-    def __init__(self, side, image_size=None):
+    def __init__(self, side, image_size=None, augmentation=True):
         self.filenames = [
             filename.replace('.jpg', '')
             for filename in os.listdir(f'./dataset/scaphoid_detection/images')
             if filename.endswith(f'{side}.jpg')
         ]
         self.length = len(self.filenames)
-        self.augmentation = albumentations.Compose([
+        self.augmentation = None if not augmentation else albumentations.Compose([
             albumentations.CLAHE(always_apply=True),
             albumentations.HorizontalFlip(),
             albumentations.RandomBrightnessContrast(brightness_limit=0)
@@ -29,9 +28,11 @@ class ScaphoidDataset(Dataset):
         with open(f'./dataset/scaphoid_detection/annotations/{filename}.pth', 'rb') as file:
             bbox = torch.load(file, weights_only=True)
         image = cv2.imread(f'./dataset/scaphoid_detection/images/{filename}.jpg')
-        augmentations = self.augmentation(image=image, bboxes=[bbox])
-        image = augmentations['image']
-        bbox = torch.tensor(augmentations['bboxes'][0]).reshape(1, 4)
+        if self.augmentation is not None:
+            augmentations = self.augmentation(image=image, bboxes=[bbox])
+            image = augmentations['image']
+            bbox = torch.tensor(augmentations['bboxes'][0])
+        bbox = bbox.reshape(1, 4)
         image = self.transform(image)
         height = image.size(1)
         width = image.size(2)
@@ -42,9 +43,12 @@ class ScaphoidDataset(Dataset):
         return self.length
 
 if __name__ == '__main__':
+    from table import Table
+
     for side in ['AP', 'LA']:
         dataset = ScaphoidDataset(side)
         image, bbox, label, filename = dataset[0]
+
         table = Table(
             title=f'Scaphoid({side})',
             headers=['Object', 'Content'],

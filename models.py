@@ -18,7 +18,6 @@ if __name__ == '__main__':
         labels = labels.cuda()
         break
 
-    images = list(images)
     targets = [
         {
             'boxes': bbox,

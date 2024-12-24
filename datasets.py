@@ -12,10 +12,10 @@ class IdentityAugmentation:
         return kwargs
 
 class ScaphoidDataset(Dataset):
-    def __init__(self, mode='train', image_size = None, augmentation=True):
+    def __init__(self, mode='train', image_size=(1400, 1200), augmentation=True):
         self.mode = mode
         self.filenames = os.listdir(f'./dataset/{mode}')
-        self.image_size = image_size if image_size is not None else (1400, 1200)
+        self.image_size = image_size
         self.length = len(self.filenames)
 
         if augmentation:

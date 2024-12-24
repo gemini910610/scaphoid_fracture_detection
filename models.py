@@ -1,11 +1,21 @@
 from torch import nn
 from torchvision.models.detection import fasterrcnn_resnet50_fpn
+from torchvision.models.detection.rpn import AnchorGenerator, RPNHead
 
 class FasterRCNN(nn.Module):
-    def __init__(self, num_classes=2):
+    def __init__(self, num_classes=2, anchor_sizes=(96, 112, 128), anchor_aspect_ratios=(1 / 1.5, 1, 1.5)):
         # num_classes include background
         super().__init__()
         self.model = fasterrcnn_resnet50_fpn(num_classes=num_classes)
+
+        anchor_count = len(anchor_sizes) * len(anchor_aspect_ratios)
+
+        self.model.anchor_generator = AnchorGenerator(
+            sizes=[anchor_sizes],
+            aspect_ratios=[anchor_aspect_ratios]
+        )
+
+        self.model.rpn.head = RPNHead(256, anchor_count)
     def forward(self, *args, **kwargs):
         forward_function = self.train_forward if self.training else self.eval_forward
         return_value = forward_function(*args, **kwargs)

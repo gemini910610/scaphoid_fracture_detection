@@ -4,9 +4,11 @@ import os
 import random
 import re
 
-from rich_tqdm import tqdm
+from utils.files import create_folders, JsonOpener
+from utils.rich_tqdm import tqdm
+from utils.annotation import Annotation
 
-class FileReNamer:
+class ReNamer:
     def __init__(self):
         self.pattern = r'^(\d+).?([LR])?.*[ -](\S+)\..{3,4}'
         self.new_side = {
@@ -59,43 +61,6 @@ class DataSplitter:
         val_data = data[train_count:]
         return train_data, val_data
 
-class JsonOpener:
-    @staticmethod
-    def read(filename):
-        with open(filename) as file:
-            annotation = json.load(file)
-        return annotation
-    @staticmethod
-    def write(filename, annotation, indent=4):
-        with open(filename, 'w') as file:
-            json.dump(annotation, file, indent=indent)
-
-class Annotation:
-    def __init__(self, filename):
-        self.image = filename
-        self.scaphoid_bbox = None
-        self.fracture_bbox = None
-    def set_scaphoid_bbox(self, bbox):
-        self.scaphoid_bbox = bbox
-    def set_fracture_bbox(self, bbox):
-        self.fracture_bbox = bbox
-    def format_data(self):
-        data = {
-            'image': self.image,
-            'bboxes': {
-                'scaphoid': self.scaphoid_bbox,
-                'fracture': self.fracture_bbox
-            }
-        }
-        return data
-    def save(self, filename):
-        data = self.format_data()
-        JsonOpener.write(filename, data)
-
-def create_folders(dir, folders):
-    for folder in folders:
-        os.makedirs(f'{dir}/{folder}', exist_ok=True)
-
 def shift_bbox(bbox, dx, dy):
     bbox = numpy.array(bbox)
     bbox = bbox + [dx, dy]
@@ -112,7 +77,7 @@ if __name__ == '__main__':
     folders = ['train', 'val']
     create_folders(dataset_dir, folders)
 
-    re_namer = FileReNamer()
+    re_namer = ReNamer()
     image_filenames = os.listdir(image_dir)
     filenames = [
         (image_filename, new_image_filename)

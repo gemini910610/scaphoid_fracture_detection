@@ -88,8 +88,8 @@ if __name__ == '__main__':
     data_splitter = DataSplitter()
     train_filenames, val_filenames = data_splitter.train_val_split(filenames)
 
-    for set_name, filenames in {'train': train_filenames, 'val': val_filenames}.items():
-        for image_filename, new_image_filename in tqdm(filenames, desc=f'{set_name:<5}'):
+    for mode, filenames in {'train': train_filenames, 'val': val_filenames}.items():
+        for image_filename, new_image_filename in tqdm(filenames, desc=f'{mode:<5}'):
             annotation = Annotation(image_filename)
 
             # annotations
@@ -111,4 +111,4 @@ if __name__ == '__main__':
                 fracture_bbox = shift_bbox(fracture_bbox, left, top)
                 annotation.set_fracture_bbox(fracture_bbox)
 
-            annotation.save(f'{dataset_dir}/{set_name}/{new_annotation_filename}')
+            annotation.save(f'{dataset_dir}/{mode}/{new_annotation_filename}')

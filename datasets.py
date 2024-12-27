@@ -3,7 +3,8 @@ import cv2
 import os
 import torch
 
-from torch.utils.data import DataLoader, Dataset
+from torch import Tensor
+from torch.utils.data import DataLoader, Dataset, default_collate
 from torchvision import transforms
 from utils.annotation import ScaphoidAnnotation
 
@@ -57,16 +58,25 @@ class ScaphoidDataset(Dataset):
     def __len__(self):
         return self.length
     @staticmethod
-    def create_loader(mode='train', image_size=(1400, 1200), augmentation=True, batch_size=1, shuffle=True):
+    def create_loader(mode='train', image_size=(1400, 1200), augmentation=True, batch_size=1, shuffle=True, device='cuda'):
         dataset = ScaphoidDataset(mode, image_size, augmentation)
-        loader = DataLoader(dataset, batch_size, shuffle)
+        loader = DataLoader(dataset, batch_size, shuffle, collate_fn=lambda batch: ScaphoidDataset.collate_fn(batch, device))
         return loader
+    @staticmethod
+    def collate_fn(batch, device):
+        batch = default_collate(batch)
+        batch = [
+            data if not isinstance(data, Tensor) else data.to(device)
+            for data in batch
+        ]
+        return batch
 
 if __name__ == '__main__':
     from utils.table import Table
 
     loader = ScaphoidDataset.create_loader(batch_size=8)
     for images, bboxes, labels, filenames in loader:
+        print(images.device)
         break
 
     table = Table(
